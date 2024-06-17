@@ -155,13 +155,12 @@ coldata <- read.csv("coldata.csv")
 rownames(coldata) <- coldata[, 1]
 coldata <- coldata[, -1]
 
-
-### comparing WT vs MCT1 KO ANG/PE
-
 coldata_drug <- coldata[-(1:17), ]
 counts_drug <- counts[ ,-(1:17)]
 
 all(colnames(counts) == rownames(coldata))
+
+### comparing WT vs MCT1 KO ANG/PE
 
 dds <- DESeqDataSetFromMatrix(countData = counts_drug,
                               colData = coldata_drug,
@@ -172,7 +171,7 @@ keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
 dds <- dds[keep,]
 
 dds$Genotype <- factor(dds$Genotype, levels = c("WT","MCT1 KO"))
-ß
+
 
 dds <- DESeq(dds)
 
@@ -182,13 +181,47 @@ res_df <- as.data.frame(res)
 
 View(res_df)
 
-res_df$log10_pvalue <- -log10(res_df$pvalue)
+write.csv(res_df, "ANGPE_filtered.csv")
+
+res_df$log10_padj <- -log10(res_df$padj)
 
 res_df |>
-  ggplot(aes(x = log2FoldChange, y = log10_pvalue)) + 
-  labs(x = "Log2 Fold Change", y = "-Log10 pvalue") +
+  ggplot(aes(x = log2FoldChange, y = log10_padj)) + 
+  labs(x = "Log2 Fold Change", y = "-Log10 padj") +
   theme_minimal() +
   geom_point()
 
-write.csv(res_df, "ANGPE.csv")
+### comparing WT vs MCT1 KO ANG/PE - No filter - probably use this
+
+dds <- DESeqDataSetFromMatrix(countData = counts_drug,
+                              colData = coldata_drug,
+                              design = ~ Genotype)
+
+smallestGroupSize <- 3
+keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
+dds <- dds[keep,]
+
+dds$Genotype <- factor(dds$Genotype, levels = c("WT","MCT1 KO"))
+
+
+dds <- DESeq(dds)
+
+res <- results(dds, independentFiltering=FALSE)
+
+res_df <- as.data.frame(res)
+
+View(res_df)
+
+write.csv(res_df, "ANGPE_unfiltered.csv")
+
+res_df$log10_padj <- -log10(res_df$padj)
+
+res_df |>
+  ggplot(aes(x = log2FoldChange, y = log10_padj)) + 
+  labs(x = "Log2 Fold Change", y = "-Log10 padj") +
+  theme_minimal() +
+  geom_point()
+
+
+
 
