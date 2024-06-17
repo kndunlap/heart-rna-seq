@@ -156,7 +156,7 @@ rownames(coldata) <- coldata[, 1]
 coldata <- coldata[, -1]
 
 
-### DRUG
+### comparing WT vs MCT1 KO ANG/PE
 
 coldata_drug <- coldata[-(1:17), ]
 counts_drug <- counts[ ,-(1:17)]
@@ -172,7 +172,7 @@ keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
 dds <- dds[keep,]
 
 dds$Genotype <- factor(dds$Genotype, levels = c("WT","MCT1 KO"))
-
+ß
 
 dds <- DESeq(dds)
 
@@ -190,5 +190,5 @@ res_df |>
   theme_minimal() +
   geom_point()
 
-write.csv(res_df, "drug.csv")
+write.csv(res_df, "ANGPE.csv")
 
