@@ -149,33 +149,36 @@ counts <- as.data.frame(combined_df)
 rownames(counts) <- counts[, 1]
 counts <- counts[, -1]
 
+
 coldata <- read.csv("coldata.csv")
+
 rownames(coldata) <- coldata[, 1]
 coldata <- coldata[, -1]
 
+
+### DRUG
+
+coldata_drug <- coldata[-(1:17), ]
+counts_drug <- counts[ ,-(1:17)]
+
 all(colnames(counts) == rownames(coldata))
-
-coldata <- coldata[-(1:7), ]
-counts <- counts[ ,-(1:7)]
-
-coldata_drug <- coldata[-(1:10), ]
-counts_drug <- counts[ ,-(1:10)]
-
-counts_drug <- counts_drug[rowSums(counts_drug >= 10) > 0, ]
 
 dds <- DESeqDataSetFromMatrix(countData = counts_drug,
                               colData = coldata_drug,
                               design = ~ Genotype)
+dds
+
+smallestGroupSize <- 3
+keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
+dds <- dds[keep,]
+
+dds$Genotype <- factor(dds$Genotype, levels = c("WT","MCT1 KO"))
+
 
 dds <- DESeq(dds)
 
-results <- results(dds)
+res <- results(dds, independentFiltering = FALSE)
 
-results$names <- rownames(results)
-
-result <- as_tibble(results)
-
-result <- result |> 
-  relocate(names)
+res_df <- as.data.frame(res)
 
 
