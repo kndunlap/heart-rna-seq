@@ -190,3 +190,5 @@ res_df |>
   theme_minimal() +
   geom_point()
 
+write.csv(res_df, "drug.csv")
+
