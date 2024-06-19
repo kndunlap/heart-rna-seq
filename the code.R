@@ -210,7 +210,7 @@ smallestGroupSize <- 3
 keep <- rowSums(counts(dds_WT) >= 10) >= smallestGroupSize
 dds_WT <- dds_WT[keep,]
 
-dds_KO$Infusion <- factor(dds_KO$Infusion, levels = c("Saline","ANGPE"))
+dds_WT$Infusion <- factor(dds_WT$Infusion, levels = c("Saline","ANGPE"))
 
 dds_WT <- DESeq(dds_WT)
 
