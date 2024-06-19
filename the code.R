@@ -210,17 +210,17 @@ smallestGroupSize <- 3
 keep <- rowSums(counts(dds_WT) >= 10) >= smallestGroupSize
 dds_WT <- dds_WT[keep,]
 
-dds_WT$Infusion <- factor(dds_WT$Infusion, levels = c("Saline","ANGPE"))
+dds_KO$Infusion <- factor(dds_KO$Infusion, levels = c("Saline","ANGPE"))
 
 dds_WT <- DESeq(dds_WT)
 
-res_WT <- results(dds_WT, independentFiltering = FALSE)
+res_WT <- results(dds_WT)
 
 res_df_WT <- as.data.frame(res_WT)
 
 View(res_df_WT)
 
-write.csv(res_df_WT, "WT_SalinevsANGPE_unfiltered.csv")
+write.csv(res_df_WT, "WT_SalinevsANGPE_unfiltered_flipped.csv")
 
 res_df$log10_padj <- -log10(res_df$padj)
 
