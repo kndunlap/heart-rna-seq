@@ -146,52 +146,23 @@ for (i in 2:length(df_list)) {
 
 counts <- as.data.frame(combined_df)
 
+coldata <- read.csv("coldata.csv")
+
+
+
 rownames(counts) <- counts[, 1]
 counts <- counts[, -1]
 
-
-coldata <- read.csv("coldata.csv")
-
 rownames(coldata) <- coldata[, 1]
 coldata <- coldata[, -1]
+
+
+### comparing WT vs MCT1 KO ANG/PE
 
 coldata_drug <- coldata[-(1:17), ]
 counts_drug <- counts[ ,-(1:17)]
 
 all(colnames(counts) == rownames(coldata))
-
-### comparing WT vs MCT1 KO ANG/PE
-
-dds <- DESeqDataSetFromMatrix(countData = counts_drug,
-                              colData = coldata_drug,
-                              design = ~ Genotype)
-
-smallestGroupSize <- 3
-keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
-dds <- dds[keep,]
-
-dds$Genotype <- factor(dds$Genotype, levels = c("WT","MCT1 KO"))
-
-
-dds <- DESeq(dds)
-
-res <- results(dds)
-
-res_df <- as.data.frame(res)
-
-View(res_df)
-
-write.csv(res_df, "ANGPE_filtered.csv")
-
-res_df$log10_padj <- -log10(res_df$padj)
-
-res_df |>
-  ggplot(aes(x = log2FoldChange, y = log10_padj)) + 
-  labs(x = "Log2 Fold Change", y = "-Log10 padj") +
-  theme_minimal() +
-  geom_point()
-
-### comparing WT vs MCT1 KO ANG/PE - No filter - probably use this
 
 dds <- DESeqDataSetFromMatrix(countData = counts_drug,
                               colData = coldata_drug,
@@ -221,6 +192,103 @@ res_df |>
   labs(x = "Log2 Fold Change", y = "-Log10 padj") +
   theme_minimal() +
   geom_point()
+
+# Comparing WT Saline vs. WT ANG/PE
+
+to_delete <- c(1:7, 14:17, 21:25)
+
+coldata_WT <- coldata[-to_delete,]
+counts_WT <- counts[,-to_delete]
+
+all(colnames(counts) == rownames(coldata))
+
+dds_WT <- DESeqDataSetFromMatrix(countData = counts_WT,
+                              colData = coldata_WT,
+                              design = ~ Infusion)
+
+smallestGroupSize <- 3
+keep <- rowSums(counts(dds_WT) >= 10) >= smallestGroupSize
+dds_WT <- dds_WT[keep,]
+
+dds_WT$Infusion <- factor(dds_WT$Infusion, levels = c("Saline","ANGPE"))
+
+dds_WT <- DESeq(dds_WT)
+
+res_WT <- results(dds_WT, independentFiltering = FALSE)
+
+res_df_WT <- as.data.frame(res_WT)
+
+View(res_df_WT)
+
+write.csv(res_df_WT, "WT_SalinevsANGPE_unfiltered.csv")
+
+res_df$log10_padj <- -log10(res_df$padj)
+
+res_df |>
+  ggplot(aes(x = log2FoldChange, y = log10_padj)) + 
+  labs(x = "Log2 Fold Change", y = "-Log10 padj") +
+  theme_minimal() +
+  geom_point()
+
+# Comparing WT Saline to KO Saline
+
+to_delete <- c(1:7, 18:25)
+
+coldata_Saline <- coldata[-to_delete,]
+counts_Saline <- counts[,-to_delete]
+
+all(colnames(counts_Saline) == rownames(coldata_Saline))
+
+dds_Saline <- DESeqDataSetFromMatrix(countData = counts_Saline,
+                                 colData = coldata_Saline,
+                                 design = ~ Genotype)
+
+smallestGroupSize <- 3
+keep <- rowSums(counts(dds_Saline) >= 10) >= smallestGroupSize
+dds_Saline <- dds_Saline[keep,]
+
+dds_Saline$Genotype <- factor(dds_Saline$Genotype, levels = c("WT","MCT1 KO"))
+
+dds_Saline <- DESeq(dds_Saline)
+
+res_Saline <- results(dds_Saline)
+
+res_df_Saline <- as.data.frame(res_Saline)
+
+View(res_df_Saline)
+
+write.csv(res_df_Saline, "WTSalinevsKOSaline_filtered.csv")
+
+# Comparing KO Saline to KO Drug
+
+to_delete <- c(1:13, 18:20)
+
+coldata_KO <- coldata[-to_delete,]
+counts_KO <- counts[,-to_delete]
+
+all(colnames(counts_KO) == rownames(coldata_KO))
+
+dds_KO <- DESeqDataSetFromMatrix(countData = counts_KO,
+                                     colData = coldata_KO,
+                                     design = ~ Infusion)
+
+smallestGroupSize <- 3
+keep <- rowSums(counts(dds_KO) >= 10) >= smallestGroupSize
+dds_KO <- dds_KO[keep,]
+
+dds_KO$Infusion <- factor(dds_KO$Infusion, levels = c("Saline","ANGPE"))
+
+dds_KO <- DESeq(dds_KO)
+
+res_KO <- results(dds_KO)
+
+res_df_KO <- as.data.frame(res_KO)
+
+View(res_df_KO)
+
+write.csv(res_df_KO, "KOSalinevsKODrug_filtered.csv")
+
+
 
 
 
